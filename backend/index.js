@@ -14,14 +14,30 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
-const corsOptions = {
-  origin: "http://localhost:5173",
-  credentials: true,
-};
-app.use(cors(corsOptions));
+const allowedOrigins = [
+  "http://localhost:5173", 
+  "https://earnest-semifreddo-9217f3.netlify.app"
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  }),
+);
+
+// Preflight handle
+app.options("*", cors());
 
 const PORT = process.env.PORT || 3000;
-// api endpoints
 
 app.use("/api/user", userRoutes);
 app.use("/api/company", companyRoutes);
